@@ -1,0 +1,10 @@
+files__pycache__/
+.idea
+*.py[cod]
+*$py.class
+build/
+dist/
+*.egg-info/
+old/
+ReadMe_old.md
+
