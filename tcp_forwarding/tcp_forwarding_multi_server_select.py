@@ -97,16 +97,21 @@ class TcpForwardingMultiServer(threading.Thread):
         logger.info('[Conn-{}] registration addr: {}, unique_id: {}'.format(id(conn), addr, unique_id))
         addr_str = '{}:{}'.format(addr[0], addr[1])
         if addr_str in self._addr_sockserver_map:
+            client, server = self._addr_sockserver_map[addr_str]
             try:
-                self._addr_sockserver_map[addr_str].shutdown(socket.SHUT_RDWR)
-                self._addr_sockserver_map[addr_str].close()
+                client.close()
+            except:
+                pass
+            try:
+                server.shutdown(socket.SHUT_RDWR)
+                server.close()
             except:
                 pass
             self._addr_sockserver_map.pop(addr_str, None)
             time.sleep(1)
         sock_server = create_tcp_socket_server(addr)
         if sock_server:
-            self._addr_sockserver_map[addr_str] = sock_server
+            self._addr_sockserver_map[addr_str] = [conn, sock_server]
             self._bind_sock_pair(conn, sock_server)
             self.register_accept(sock_server, True)
         else:

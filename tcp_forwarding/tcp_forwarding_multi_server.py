@@ -50,9 +50,14 @@ class TcpForwardingMultiServer(threading.Thread):
             logger.info('addr: {}, unique_id: {}'.format(addr, unique_id))
             addr_str = '{}:{}'.format(addr[0], addr[1])
             if addr_str in self._addr_sockserver_map:
+                client, server = self._addr_sockserver_map[addr_str]
                 try:
-                    self._addr_sockserver_map[addr_str].shutdown(socket.SHUT_RDWR)
-                    self._addr_sockserver_map[addr_str].close()
+                    client.close()
+                except:
+                    pass
+                try:
+                    server.shutdown(socket.SHUT_RDWR)
+                    server.close()
                 except:
                     pass
                 self._addr_sockserver_map.pop(addr_str, None)
@@ -61,7 +66,7 @@ class TcpForwardingMultiServer(threading.Thread):
             if not sock_server:
                 sock.close()
                 return
-            self._addr_sockserver_map[addr_str] = sock_server
+            self._addr_sockserver_map[addr_str] = [sock, sock_server]
             logger.info('Wait for client connect {}'.format(addr))
             sock_in, addr_in = sock_server.accept()
             sock_server.close()

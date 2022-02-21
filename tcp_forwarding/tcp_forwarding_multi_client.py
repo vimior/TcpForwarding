@@ -39,10 +39,15 @@ class TcpForwardingMultiClient(threading.Thread):
                 sock_in = create_tcp_socket_client(self._server_addr, show_log=False)
                 if not sock_in:
                     continue
+                sock_in.settimeout(30)
                 log_flag = True
                 ret = sock_in.send(self._pack_verify_data())
                 logger.info('send verify data, ret={}'.format(ret))
-                data = sock_in.recv(13)
+                try:
+                    data = sock_in.recv(13)
+                except socket.timeout:
+                    sock_in.close()
+                    continue
                 logger.info('recv confirm data, data={}'.format(data))
                 if not data:
                     sock_in.close()
